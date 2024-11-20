@@ -1,0 +1,60 @@
+[project]
+name = "terminallm"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic[vertex]>=0.39.0",
+    "google-cloud-aiplatform>=1.71.1",
+    "litellm>=1.52.3",
+    "pathspec>=0.12.1",
+    "pyaudio>=0.2.14",
+    "pydantic>=2.9.2",
+    "python-dotenv>=1.0.1",
+    "pyttsx3>=2.98",
+    "speechrecognition>=3.11.0",
+    "tenacity>=9.0.0",
+    "termcolor>=2.5.0",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+dev-dependencies = [
+    "pyclean>=3.0.0",
+    "ruff>=0.7.3",
+]
+
+[tool.ruff]
+exclude = [
+    ".ruff_cache",
+    ".git",
+    ".ipynb_checkpoints",
+    ".ruff_cache",
+    ".venv",
+    ".vscode",
+    "notebooks",
+    "ruff"
+]
+extend-include = []
+line-length = 120
+indent-width = 4
+target-version = "py39"
+
+[tool.ruff.lint]
+ignore = ["ANN204", "ANN401", "E731", "D", "DTZ005", "BLE001","B008", "CPY001","COM812", "ERA001", "EM101","EM102", "FA","FBT", "G004", "UP", "TRY", "PTH123","ISC001" ]
+select = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+
+[project.scripts]
+terminallm = "terminallm.main:main"

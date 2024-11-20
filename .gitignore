@@ -1,0 +1,11 @@
+### Python template
+
+__pycache__/
+.ipynb_checkpoints
+.venv
+.ruff_cache/
+data/
+nbs/
+.flake8
+dist/
+terminallm.egg-info/
