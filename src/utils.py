@@ -118,8 +118,15 @@ def get_litellm_model_name(model: str, provider: str) -> str:
         The properly formatted model name for litellm
     """
     # Format model name based on provider
-    if provider == "openai" and model == "gpt-4o":
-        return "gpt-4o"
+    if provider == "azure" and model == "gpt-4-32k":
+        return "azure/finaclegpt432k"
+    if provider == "azure" and model == "gpt-4o-16k":
+        return "azure/finaclegpt4o16k"
+    if provider == "azure" and model == "gpt-4o":
+        return "azure/finaclegpt4o"
+    if provider == "azure" and model == "gpt-4.1":
+        return "azure/finaclegpt4.1"
+    if provider == "vertex_ai" and model == "gemini-1.5":
         return "vertex_ai/gemini-1.5-pro-002"
     if provider == "vertex_ai" and model == "gemini-2.0":
         return "vertex_ai/gemini-2.0-flash-001"

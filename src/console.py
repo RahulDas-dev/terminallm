@@ -2,15 +2,77 @@
 import shutil
 import sys
 
-import colorama
+
 from colorama import Fore, Style
-
-from .event_system import get_event_emitter
-
-colorama.init()
+from .eventing_system import get_event_manager
+from .eventing_system.types import StreamEventType, StreamEvent
 
 
 class Console:
+    def __init__(self):
+        """
+        Initializes the console with colorama.
+        """
+        self.terminal_width = shutil.get_terminal_size().columns
+
+    async def setup_listeners(self) -> None:
+        """Set up event listeners."""
+        event_bus = get_event_manager()
+        await event_bus.subscribe([StreamEventType.STREAM_CONTENT, StreamEventType.STREAM_CHUNK], self.handle_llm_content)
+        await event_bus.subscribe([StreamEventType.STREAM_COMPLETE], self.handle_llm_complete)
+        await event_bus.subscribe([StreamEventType.STREAM_TOOL_CALL], self.handle_tool_start)
+        await event_bus.subscribe([StreamEventType.STREAM_CHUNK], self.handle_tool_complete)
+        await event_bus.subscribe([StreamEventType.STREAM_ERROR], self.handle_tool_error)
+        await event_bus.subscribe([StreamEventType.TOKEN_COUNT], self.handle_token_counts)
+
+    def handle_llm_content(self, event: StreamEvent) -> None:
+        """Handle LLM content chunks."""
+        data = event.data.choices[0].delta.content
+        if not data:
+            return
+        sys.stdout.write(f"{Fore.GREEN}{data}{Style.RESET_ALL}")
+        sys.stdout.flush()
+
+    def handle_llm_complete(self, event: StreamEvent) -> None:
+        """Handle LLM response completion."""
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+
+    def handle_tool_start(self, event: StreamEvent) -> None:
+        """Handle tool execution start."""
+        tool_name = event.data.choices[0].
+        # Tools logs go to stderr with yellow color
+        sys.stderr.write(f"{Fore.YELLOW}[EXECUTING TOOL]{tool_name}{Style.RESET_ALL}\n")
+        sys.stderr.flush()
+
+    def handle_tool_complete(self, tool_name: str, message: str) -> None:
+        """Handle tool execution completion."""
+        sys.stderr.write(f"{Fore.YELLOW}[TOOL CALLED ] {tool_name} | {message}{Style.RESET_ALL}\n")
+        sys.stderr.flush()
+
+    def handle_tool_error(self, tool_name: str, error: str) -> None:
+        """Handle tool execution error."""
+        sys.stderr.write(f"{Fore.RED}[TOOL ERROR] {tool_name}: {error}{Style.RESET_ALL}\n")
+        sys.stderr.flush()
+
+    def handle_token_counts(self, input_token: int, output_token: int, tokens_allowed: int | None) -> None:
+        """Display token usage information."""
+        total_tokens = input_token + output_token
+        token_str = f"Tokens used: {total_tokens}[ = {input_token} + {output_token}]"
+        if tokens_allowed is not None:
+            token_used = round((total_tokens / tokens_allowed) * 100, 2)
+            token_str += f" | {tokens_allowed}, {token_used} %"
+
+        clean_text = token_str.replace(Fore.YELLOW, "").replace(Fore.RED, "").replace(Style.RESET_ALL, "")
+
+        # Calculate padding to align right
+        padding = max(0, self.terminal_width - len(clean_text) - 2)
+
+        sys.stderr.write(f"\r{' ' * padding}{Fore.BLUE}{token_str}{Style.RESET_ALL}\n")
+        sys.stderr.flush()
+
+
+class ConsoleOLD:
     """Console handler for displaying LLM output and logs."""
 
     def __init__(self):
@@ -18,6 +80,7 @@ class Console:
 
     def setup_listeners(self) -> None:
         """Set up event listeners."""
+        from .event_system import get_event_emitter
         event_bus = get_event_emitter()
         event_bus.on("llm:content", self.handle_llm_content)
         event_bus.on("llm:complete", self.handle_llm_complete)
