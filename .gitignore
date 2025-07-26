@@ -2,10 +2,11 @@
 
 __pycache__/
 .ipynb_checkpoints
-.venv
+.venv/
 .ruff_cache/
 data/
 nbs/
-.flake8
 dist/
-terminallm.egg-info/
+.env
+*.log
+chat_history.json

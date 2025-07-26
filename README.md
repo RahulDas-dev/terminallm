@@ -1,39 +1,55 @@
 # TerminalLM
-================
 
-## Description
----------------
+TerminalLM is a Toy Python application that provides an agent-based interface for interacting with LLMs directly from your terminal. The agent can perform various software engineering tasks such as reading files ~~writing files~~, ~~Editing Existing File~~, executing shell commands, and managing directories, all powered by LLM reasoning.
 
-TerminalLM is a CLI (Command-Line Interface) tool for interacting with various LLM clients. It provides a simple and intuitive way to use different LLM models for tasks such as text generation, completion, qna and more.
+## Overview
 
-## Installation
-------------
-
-To install TerminalLM, run the following command:
-```
-pip install terminallm
-```
+This project serves as a demonstration of how Claude code or Gemini CLI works, developed purely for educational and demonstration purposes. The codebase is highly motivated by Gemini CLI's architecture and functionality (https://github.com/google-gemini/gemini-cli.git). While the core functionality is similar to these commercial tools, the codebase is designed to be easily extensible, allowing developers to add new tools, capabilities, or integrate with different LLM providers as needed.
 
 ## Features
-------------
 
+- Support for multiple LLM providers including OpenAI, Azure, Google Vertex AI, and AWS Bedrock
+- Built-in tool system for file operations, directory management, and shell command execution
+- Available LLM-accessible tools:
+  - File tools: Reading files, writing files, and file globbing
+  - Directory tools: Listing directory contents 
+  - Shell tools: Executing shell commands
+
+## Supported Models
+
+TerminalLM supports any model that LiteLLM can connect to
+
+## Development
+
+Requires Python 3.13 or higher.
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/terminallm.git
+cd terminallm
+
+uv sync 
+```
 
 ## Usage
-------------
 
-To use TerminalLM, run the following command:
+```bash
+# Basic usage with default settings
+uv run main.py or python main.py
+
+# Specify a different LLM model
+python main.py --model gpt-4o
+
+# Enable debug mode
+python main.py --debug
+
+# Specify a target directory
+python main.py --target-dir /path/to/your/project --task Write a suitable readme.md for the project
 ```
-terminallm --help
-terminallm --help
-```
 
-## Modes
-------------
+## Configuration
 
-TerminalLM supports the following modes:
+The application can be configured through command-line arguments or environment variables. Create a `.env` file in the project root to set environment variables.
 
-* tt: Text-to-text mode, where the user provides input text and the LLM generates output text.
-* ms: Multi-step mode, where the user provides input text and the LLM generates output text in multiple steps.
-* mt: Multi-turn mode, where the user provides input text and the LLM generates output text in multiple turns.
-* ts: Text-to-speech mode, where the user provides input text and the LLM generates speech output.
+TerminalLM uses LiteLLM as its LLM client, which means it can be configured to work with any LLM provider supported by LiteLLM through the appropriate environment variables. This provides extensive flexibility for connecting to different models across various providers.
 
