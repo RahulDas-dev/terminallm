@@ -1,10 +1,13 @@
 # ruff: noqa:  PLW0603
+import logging
 import shutil
 import sys
 
 from colorama import Fore, Style
 
 from .event_sys import StreamEvent, StreamEventType, get_event_manager
+
+logger = logging.getLogger("Console")
 
 
 class Console:
@@ -60,8 +63,11 @@ class Console:
                 [tool.function.name for tool in event.tool_call_data if tool.function.name is not None]
             )
         else:
-            tool_names = "No tools called"
-        sys.stdout.write(f"{Fore.YELLOW}[EXECUTING TOOL]{tool_names}{Style.RESET_ALL}\n")
+            tool_names = None
+        if tool_names is None:
+            logger.warning("Tool Name is None, skipping tool execution display")
+            return
+        sys.stdout.write(f"{Fore.YELLOW}[ EXECUTING TOOL ] | {tool_names.upper()}{Style.RESET_ALL}\n")
         sys.stdout.flush()
 
     def handle_tool_result(self, event: StreamEvent) -> None:
@@ -69,7 +75,8 @@ class Console:
         tool_names = event.tool_result.get("name", "Unknown Tool").upper()
         message = event.tool_result.get("content", "No content returned")
         time = event.tool_result.get("time", "Unknown time")
-        sys.stdout.write(f"{Fore.YELLOW}[ TOOL complited ] | {time} | {tool_names} | {message} {Style.RESET_ALL}\n")
+        time = round(time, 2) if isinstance(time, (int, float)) else time
+        sys.stdout.write(f"{Fore.YELLOW}[ TOOL COMPLITED ] | {time} ms | {tool_names} | {message} {Style.RESET_ALL}\n")
         sys.stdout.flush()
 
     def handle_tool_error(self, event: StreamEvent) -> None:
@@ -85,12 +92,12 @@ class Console:
         output_token = event.token_count.get("completion_tokens", 0)
         allowed_token = event.token_count.get("tokens_allowed", None)
         total_tokens = input_token + output_token
-        token_str = f"Tokens used: {total_tokens}[ = {input_token} + {output_token}]"
+        token_str = f"Tokens used - {total_tokens} [ = {input_token} + {output_token}]"
         if allowed_token is not None:
             try:
                 allowed_token = int(allowed_token)
                 token_used = round((total_tokens / allowed_token) * 100, 2)
-                token_str += f" | {allowed_token}, {token_used} %"
+                token_str += f" | {allowed_token}, {token_used}%"
             except (ValueError, TypeError, ZeroDivisionError):
                 pass  # Skip percentage calculation if there's an issue
         clean_text = token_str.replace(Fore.YELLOW, "").replace(Fore.RED, "").replace(Style.RESET_ALL, "")

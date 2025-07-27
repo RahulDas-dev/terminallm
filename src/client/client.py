@@ -25,7 +25,6 @@ class LlmClient:
         Args:
             target_dir: The target directory for the client.
             config: The configuration for the application.
-            tool_call_manager: The ToolCallManager instance to handle tool calls.
         """
         self.config = config
         self.target_dir = target_dir

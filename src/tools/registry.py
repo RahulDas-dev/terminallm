@@ -61,7 +61,7 @@ class ToolRegistry:
         Discovers any project-specific tools and registers them with the registry.
         """
 
-    def register_tools(self, config: Config, target_dir: str | None = None) -> None:
+    def register_tools(self, config: Config, target_dir: str) -> None:
         """
         Registers all core tools with the global registry based on the provided configuration.
 
@@ -75,6 +75,7 @@ class ToolRegistry:
         self._tools.clear()
 
         from .directory_tools import ListDirectoryTool
+        from .edit_file import EditFile
         from .glob_tool import GlobTool
         from .read_file import ReadFileTool
         from .shell_tools import ShellTool
@@ -86,6 +87,7 @@ class ToolRegistry:
             WriteFileTool(config),
             ShellTool(config),
             GlobTool(config),
+            EditFile(config, target_dir),
         ]
 
         for tool in tools:

@@ -15,14 +15,14 @@ from .registry import ToolRegistry
 logger = logging.getLogger(__name__)
 
 
-class ToolCallManager:
+class ToolExecutor:
     """
     A class for managing tool calls.
     """
 
     def __init__(self, config: Config, tool_registry: ToolRegistry) -> None:
         """
-        Initializes a new instance of the ToolCallManager class.
+        Initializes a new instance of the ToolExecutor class.
 
         Args:
             config: The configuration for the application.

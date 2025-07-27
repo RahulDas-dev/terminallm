@@ -44,7 +44,7 @@ def _get_args() -> argparse.Namespace:
     return args
 
 
-async def main() -> None:
+async def main() -> str | None:
     """
     Main function for the LLM CLI application. Parses command-line arguments,
     initializes the CLI, and runs in either interactive or non-interactive mode.
@@ -68,9 +68,10 @@ async def main() -> None:
     await agent.initialize()
 
     if task:
-        await agent.run_non_interactive(task)
+        response = await agent.run_non_interactive(task)
     else:
-        await agent.run_interactive()
+        response = await agent.run_interactive()
+    return response
 
 
 if __name__ == "__main__":

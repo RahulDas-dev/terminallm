@@ -6,7 +6,7 @@ from litellm.types.utils import Choices, Message, ModelResponse  # , ModelRespon
 
 from src.config import Config
 from src.event_sys import StreamEvent, StreamEventType, get_event_manager
-from src.tools import ToolCallManager, get_registry
+from src.tools import ToolExecutor, get_registry
 
 from .client import LlmClient
 
@@ -19,7 +19,7 @@ class ContentGenerator:
         self.target_dir = target_dir
         self.client = LlmClient(target_dir=self.target_dir, config=self.config)
         self.event_bus = get_event_manager()
-        self.tool_call_manager = ToolCallManager(self.config, get_registry())
+        self.tool_call_manager = ToolExecutor(self.config, get_registry())
 
     async def generate_content_streaming(
         self,
