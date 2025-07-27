@@ -4,9 +4,9 @@ from typing import Any
 import litellm
 from litellm.types.utils import Choices, Message, ModelResponse  # , ModelResponseStream
 
-from src.config import Config
-from src.event_sys import StreamEvent, StreamEventType, get_event_manager
-from src.tools import ToolExecutor, get_registry
+from lib.config import Config
+from lib.event_sys import StreamEvent, StreamEventType, get_event_manager
+from lib.tools import ToolExecutor, get_registry
 
 from .client import LlmClient
 

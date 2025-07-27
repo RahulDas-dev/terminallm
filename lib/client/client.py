@@ -6,9 +6,9 @@ import litellm
 from litellm.types.utils import ModelResponseStream
 
 # from litellm.utils import token_counter
-from src.config import Config
-from src.event_sys import StreamEvent, StreamEventType, get_event_manager
-from src.utils import get_litellm_model_params
+from lib.config import Config
+from lib.event_sys import StreamEvent, StreamEventType, get_event_manager
+from lib.utils import get_litellm_model_params
 
 logger = logging.getLogger(__name__)
 

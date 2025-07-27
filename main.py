@@ -3,7 +3,7 @@ import asyncio
 import sys
 from pathlib import Path
 
-from src import CoderAgent
+from terminallm import TerminaLLMApp
 
 
 def _get_args() -> argparse.Namespace:
@@ -60,17 +60,17 @@ async def main() -> str | None:
         "provider": args.provider,
         "debug_mode": args.debug,
         "approval_mode": "yolo" if args.yolo else "default",
-        "core_tools": ["list_directory", "read_file", "write_file", "glob", "run_shell_command"],
+        "core_tools": ["list_directory", "read_file", "write_file", "edit_file", "glob", "run_shell_command"],
         "debug": args.debug,
     }
 
-    agent = CoderAgent(target_dir, config)
-    await agent.initialize()
+    app = TerminaLLMApp(target_dir, config)
+    await app.initialize()
 
     if task:
-        response = await agent.run_non_interactive(task)
+        response = await app.run_non_interactive(task)
     else:
-        response = await agent.run_interactive()
+        response = await app.run_interactive()
     return response
 
 

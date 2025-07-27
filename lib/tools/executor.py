@@ -5,8 +5,8 @@ from typing import Any
 
 from litellm import ChatCompletionMessageToolCall
 
-from src.config import Config
-from src.event_sys import StreamEvent, StreamEventType, get_event_manager
+from lib.config import Config
+from lib.event_sys import StreamEvent, StreamEventType, get_event_manager
 
 from .base import Tool
 from .registry import ToolRegistry

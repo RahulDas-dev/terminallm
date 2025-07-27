@@ -9,10 +9,8 @@ from dotenv import load_dotenv
 
 from .client import LLMClientSession
 from .config import Config
-from .console import get_console
 from .event_sys import get_event_manager
 from .tools import get_registry
-from .utils import setup_logger_for_cli
 
 logger = logging.getLogger("Agent")
 
@@ -31,7 +29,7 @@ class CoderAgent:
         """
         self.target_dir = target_dir
         self.config = Config() if config_params is None else Config(**config_params)
-        self.console = get_console()
+        # self.console = get_console()
         self.tool_registry = get_registry()
         self.session = LLMClientSession(config=self.config, target_dir=self.target_dir)
         self.event_bus = get_event_manager()
@@ -41,13 +39,13 @@ class CoderAgent:
         Initializes the configuration, client, and tool call manager.
         This method must be called before processing any input.
         """
-        setup_logger_for_cli(self.config)
+        # setup_logger_for_cli(self.config)
         logger.info(f"Config Details: {self.config}")
         status = load_dotenv()
         if not status:
             logger.warning("No .env file found Make Sure Required Environment Variables are set")
         colorama.init()
-        await self.console.setup_listeners()
+        # await self.console.setup_listeners()
         self.tool_registry.register_tools(self.config, target_dir=self.target_dir)
         logger.info(f"Available tools: {self.tool_registry.get_available_functions()}")
 
@@ -74,33 +72,3 @@ class CoderAgent:
         final_response = await self.session.chat_message_stream(user_input, tool_definitions)
 
         return final_response
-
-    async def run_non_interactive(self, question: str) -> str | None:
-        """
-        Runs the CLI in non-interactive mode.
-        """
-        try:
-            response = await self._execute_task(question)
-            await self.save_chat_history()
-            return response
-        except Exception as e:
-            logger.exception(f"An error occurred: {e}")
-
-    async def run_interactive(self) -> str | None:
-        """
-        Runs the CLI in interactive mode.
-        """
-        response = None
-        try:
-            task_str = "Enter your question or type 'exit' to quit >"
-            while True:
-                user_input = await self.console.get_user_input(task_str)
-                if user_input.lower() in ("exit", "quit"):
-                    break
-                # self.console.print("Assistant >")
-                response = await self._execute_task(user_input)
-                task_str = ""
-            await self.save_chat_history()
-            return response
-        except Exception as e:
-            logger.exception(f"An error occurred: {e}")

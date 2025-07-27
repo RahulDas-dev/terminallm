@@ -5,7 +5,7 @@ import sys
 
 from colorama import Fore, Style
 
-from .event_sys import StreamEvent, StreamEventType, get_event_manager
+from lib.event_sys import StreamEvent, StreamEventType, get_event_manager
 
 logger = logging.getLogger("Console")
 

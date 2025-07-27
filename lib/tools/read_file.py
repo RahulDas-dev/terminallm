@@ -3,7 +3,7 @@ from typing import Any
 
 import aiofiles
 
-from src.config import Config
+from lib.config import Config
 
 from .base import Tool
 

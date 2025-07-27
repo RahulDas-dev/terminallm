@@ -1,7 +1,7 @@
 from string import Template
 from typing import Any
 
-from src.config import Config
+from lib.config import Config
 
 from ._prompt import REACT_SYSTEM_PROMPT
 from .content_generator import ContentGenerator

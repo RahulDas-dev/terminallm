@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from src.config import Config
+    from lib.config import Config
 
     from .base import Tool
 
