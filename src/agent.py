@@ -79,20 +79,26 @@ class CoderAgent:
         """
         Runs the CLI in non-interactive mode.
         """
-        response = await self._execute_task(question)
-        await self.save_chat_history()
-        return response
+        try:
+            response = await self._execute_task(question)
+            await self.save_chat_history()
+            return response
+        except Exception as e:
+            logger.exception(f"An error occurred: {e}")
 
     async def run_interactive(self) -> None:
         """
         Runs the CLI in interactive mode.
         """
-        task_str = "Enter your question or type 'exit' to quit >"
-        while True:
-            user_input = self.console.get_user_input(task_str)
-            if user_input.lower() in ("exit", "quit"):
-                break
-            self.console.print("Assistant >")
-            _ = await self._execute_task(user_input)
-            task_str = ""
-        await self.save_chat_history()
+        try:
+            task_str = "Enter your question or type 'exit' to quit >"
+            while True:
+                user_input = await self.console.get_user_input(task_str)
+                if user_input.lower() in ("exit", "quit"):
+                    break
+                # self.console.print("Assistant >")
+                _ = await self._execute_task(user_input)
+                task_str = ""
+            await self.save_chat_history()
+        except Exception as e:
+            logger.exception(f"An error occurred: {e}")

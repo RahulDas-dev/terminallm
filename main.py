@@ -29,7 +29,7 @@ def _get_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--provider",
-        default="openail",
+        default="openai",
         help="Provider to use (azure, aws, vertex_ai)",
         choices=["openai", "azure", "vertex_ai", "bedrock"],
     )

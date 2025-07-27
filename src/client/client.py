@@ -3,6 +3,7 @@ from collections.abc import AsyncIterator
 from typing import Any
 
 import litellm
+from litellm.types.utils import ModelResponseStream
 
 # from litellm.utils import token_counter
 from src.config import Config
@@ -32,7 +33,7 @@ class LlmClient:
 
     async def send_message_stream(
         self, messages: list[dict[str, Any]], tools: list[dict[str, Any]] | None = None
-    ) -> AsyncIterator[StreamEvent]:
+    ) -> AsyncIterator[ModelResponseStream]:
         """
         Sends a message to the language model and streams the response, yielding parsed events.
         handles model fallback and tool calls.
@@ -79,11 +80,12 @@ class LlmClient:
             await self.event_bus.publish(
                 StreamEvent(
                     etype=StreamEventType.STREAM_COMPLETE,
-                    data=chunk,
+                    data=None,
                 )
             )
         except Exception as e:
             logger.error(f"Error sending message stream: {e}")
+            # Publish error event
             await self.event_bus.publish(
                 StreamEvent(
                     etype=StreamEventType.STREAM_ERROR,
@@ -91,3 +93,15 @@ class LlmClient:
                     error=str(e),
                 )
             )
+
+            # Also publish completion event to ensure proper event sequence
+            await self.event_bus.publish(
+                StreamEvent(
+                    etype=StreamEventType.STREAM_COMPLETE,
+                    data=None,
+                )
+            )
+
+            # Re-raise the exception to be handled by caller
+            # This maintains the contract specified by the return type
+            raise

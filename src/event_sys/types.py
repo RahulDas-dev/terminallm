@@ -25,6 +25,7 @@ class StreamEventType(str, Enum):
     CHAT_COMPRESSED = "chat_compressed"
     PROVIDER_SWITCHED = "provider_switched"
     TOKEN_COUNT = "tokens_count"
+    USER_INPUT = "user_input"
 
 
 @dataclass(frozen=True, slots=True)

@@ -242,3 +242,14 @@ class EventManager:
             self._event_history.clear()
 
         logger.info("Event manager shut down")
+
+    async def wait_for_previous_events(self) -> None:
+        """
+        Wait for all previous events to be processed before shutting down.
+
+        This ensures that no events are lost during shutdown.
+        """
+        for subs_id, subscription in self._subscriptions.items():
+            if subscription.queue.qsize() > 0:
+                logger.info(f"Waiting for event from subscription {subs_id} to be processed ..")
+                await asyncio.sleep(0.1)  # Allow some time for processing

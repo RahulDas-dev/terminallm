@@ -27,28 +27,25 @@ class ContentGenerator:
         tools: list[dict[str, Any]] | None = None,
     ) -> str | None:
         final_response = None
-        try:
-            while True:
-                chunks = []
-                async for chunk in self.client.send_message_stream(messages=messages, tools=tools):
-                    chunks.append(chunk)
-                response_ = litellm.stream_chunk_builder(chunks)
-                response_choice: Choices = response_.choices[0]
-                response_message = response_choice.message
-                messages = self._update_llm_response(response_message, messages)
+        while True:
+            chunks = []
+            async for chunk in self.client.send_message_stream(messages=messages, tools=tools):
+                chunks.append(chunk)
+            response_ = litellm.stream_chunk_builder(chunks)
+            response_choice: Choices = response_.choices[0]
+            response_message = response_choice.message
+            messages = self._update_llm_response(response_message, messages)
 
-                if response_message.tool_calls:
-                    tool_response = await self.tool_call_manager.schedule(
-                        response_message.tool_calls,
-                        signal=None,
-                    )
-                    messages = self._update_tool_response(tool_response, messages)
-                await self._token_counts(response_)
-                if response_message.content and response_choice.finish_reason == "stop":
-                    final_response = response_message.content
-                    break
-        except Exception as e:
-            logger.error(f"Error generating content: {e}")
+            if response_message.tool_calls:
+                tool_response = await self.tool_call_manager.schedule(
+                    response_message.tool_calls,
+                    signal=None,
+                )
+                messages = self._update_tool_response(tool_response, messages)
+            await self._token_counts(response_)
+            if response_message.content and response_choice.finish_reason == "stop":
+                final_response = response_message.content
+                break
         return final_response
 
     def _update_llm_response(self, response_message: Message, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -96,8 +93,10 @@ class ContentGenerator:
 
     async def _token_counts(self, response: ModelResponse) -> tuple[int, int, int | None]:
         if not response:
+            logger.warning("No Usage information, Response is None or empty.")
             return 0, 0, None
         if not hasattr(response, "usage") or response.usage is None:
+            logger.warning("Response does not contain usage information.")
             return 0, 0, None
         total_tokens = response.usage.total_tokens
         prompt_tokens = response.usage.prompt_tokens

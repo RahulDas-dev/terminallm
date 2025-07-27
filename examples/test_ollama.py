@@ -17,6 +17,7 @@ async def async_ollama():
         stream=True
     )
     async for chunk in response:
+        print(type(chunk))
         print(chunk.choices[0].delta.content, end="", flush=True)
 
 # call async_ollama

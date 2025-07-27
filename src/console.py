@@ -13,19 +13,20 @@ class Console:
         Initializes the console with colorama.
         """
         self.terminal_width = shutil.get_terminal_size().columns
+        self.event_bus = get_event_manager()
 
     async def setup_listeners(self) -> None:
         """Set up event listeners."""
-        event_bus = get_event_manager()
-        await event_bus.subscribe(
+        await self.event_bus.subscribe(
             [StreamEventType.STREAM_CONTENT, StreamEventType.STREAM_CHUNK], self.handle_llm_content
         )
-        await event_bus.subscribe([StreamEventType.STREAM_COMPLETE], self.handle_llm_complete)
-        await event_bus.subscribe([StreamEventType.STREAM_ERROR], self.handle_stream_error)
-        await event_bus.subscribe([StreamEventType.TOOL_CALL_START], self.handle_tool_start)
-        await event_bus.subscribe([StreamEventType.TOOL_RESULT], self.handle_tool_result)
-        await event_bus.subscribe([StreamEventType.TOOL_ERROR], self.handle_tool_error)
-        await event_bus.subscribe([StreamEventType.TOKEN_COUNT], self.handle_token_counts)
+        await self.event_bus.subscribe([StreamEventType.STREAM_COMPLETE], self.handle_llm_complete)
+        await self.event_bus.subscribe([StreamEventType.STREAM_ERROR], self.handle_stream_error)
+        await self.event_bus.subscribe([StreamEventType.TOOL_CALL_START], self.handle_tool_start)
+        await self.event_bus.subscribe([StreamEventType.TOOL_RESULT], self.handle_tool_result)
+        await self.event_bus.subscribe([StreamEventType.TOOL_ERROR], self.handle_tool_error)
+        await self.event_bus.subscribe([StreamEventType.TOKEN_COUNT], self.handle_token_counts)
+        # await event_bus.subscribe([StreamEventType.USER_INPUT], self.handel_user_input)
 
     def handle_llm_content(self, event: StreamEvent) -> None:
         """Handle LLM content chunks."""
@@ -45,7 +46,7 @@ class Console:
 
     def handle_stream_error(self, event: StreamEvent) -> None:
         error_msg = event.error
-        sys.stderr.write(f"{Fore.RED}{error_msg}{Style.RESET_ALL}")
+        sys.stderr.write(f"{Fore.RED}ERROR - {error_msg}{Style.RESET_ALL}")
         sys.stderr.flush()
 
     def handle_tool_start(self, event: StreamEvent) -> None:
@@ -94,10 +95,10 @@ class Console:
                 pass  # Skip percentage calculation if there's an issue
         clean_text = token_str.replace(Fore.YELLOW, "").replace(Fore.RED, "").replace(Style.RESET_ALL, "")
         padding = max(0, self.terminal_width - len(clean_text) - 2)
-        sys.stderr.write(f"\n\r{' ' * padding}{Fore.BLUE}{token_str}{Style.RESET_ALL}\n")
+        sys.stderr.write(f"\n\r{' ' * padding}{Fore.LIGHTBLUE_EX}{token_str}{Style.RESET_ALL}\n")
         sys.stderr.flush()
 
-    def get_user_input(self, prompt: str = "") -> str:
+    async def get_user_input(self, user_input: str) -> str:
         """Get input from the user with optional prompt.
 
         Args:
@@ -106,17 +107,15 @@ class Console:
         Returns:
             The user's input as a string
         """
-        sys.stdout.write("\n")
-        sys.stdout.flush()
-
-        prompt_ = prompt or "Enter your input Query or Type 'exit' to 'quit' >"
+        prompt_ = user_input or "\nEnter your input Query or Type 'exit' to 'quit' >"
+        await self.event_bus.wait_for_previous_events()
         while True:
             sys.stdout.write(f"{Fore.CYAN}{prompt_}{Style.RESET_ALL} ")
             sys.stdout.flush()
             try:
                 usr_input = input()
                 if not usr_input.strip():
-                    prompt_ = "Enter your input Query or Type 'exit' to 'quit' > "
+                    prompt_ = "\nEnter your input Query or Type 'exit' to 'quit' > "
                 else:
                     break
             except KeyboardInterrupt:
@@ -148,17 +147,3 @@ def get_console() -> Console:
         _global_console = Console()
 
     return _global_console
-
-
-def get_user_input(prompt: str = "") -> str:
-    """
-    Helper function to get input from the user with a colored prompt.
-
-    Args:
-        prompt: Text to display as the input prompt
-
-    Returns:
-        The user's input as a string
-    """
-    console = get_console()
-    return console.get_user_input(prompt)
