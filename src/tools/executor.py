@@ -6,11 +6,10 @@ from typing import Any
 from litellm import ChatCompletionMessageToolCall
 
 from src.config import Config
-from src.event_sys import get_event_manager
-from src.event_sys.types import StreamEvent, StreamEventType
+from src.event_sys import StreamEvent, StreamEventType, get_event_manager
 
 from .base import Tool
-from .tool_registry import ToolRegistry
+from .registry import ToolRegistry
 
 # Get a logger instance
 logger = logging.getLogger(__name__)

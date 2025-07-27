@@ -14,6 +14,7 @@ This project serves as a demonstration of how Claude code or Gemini CLI works, d
   - File tools: Reading files, writing files, and file globbing
   - Directory tools: Listing directory contents 
   - Shell tools: Executing shell commands
+- Event Based Communication Agent and Console ~~and SDK Logger~~
 
 ## Supported Models
 
@@ -49,7 +50,7 @@ python main.py --target-dir /path/to/your/project --task Write a suitable readme
 
 ## Configuration
 
-The application can be configured through command-line arguments or environment variables. Create a `.env` file in the project root to set environment variables.
+The application can be configured through command-line arguments or environment variables. Create a `.env` file in the project root to set environment variables. Kidly Check `.env.example`.
 
 TerminalLM uses LiteLLM as its LLM client, which means it can be configured to work with any LLM provider supported by LiteLLM through the appropriate environment variables. This provides extensive flexibility for connecting to different models across various providers.
 

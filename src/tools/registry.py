@@ -75,8 +75,10 @@ class ToolRegistry:
         self._tools.clear()
 
         from .directory_tools import ListDirectoryTool
-        from .file_tools import GlobTool, ReadFileTool, WriteFileTool
+        from .glob_tool import GlobTool
+        from .read_file import ReadFileTool
         from .shell_tools import ShellTool
+        from .write_file import WriteFileTool
 
         tools = [
             ListDirectoryTool(config),
