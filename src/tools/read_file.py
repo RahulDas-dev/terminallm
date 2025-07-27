@@ -13,8 +13,6 @@ class ReadFileTool(Tool):
     A tool for reading files from the filesystem.
     """
 
-    Name = "read_file"
-
     def __init__(self, config: Config):
         """
         Initializes the ReadFileTool.

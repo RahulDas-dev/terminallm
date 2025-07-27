@@ -20,8 +20,6 @@ class ShellTool(Tool):
     A tool for running shell commands.
     """
 
-    Name = "run_shell_command"
-
     def __init__(self, config: Config):
         """
         Initializes the ShellTool.
