@@ -11,7 +11,7 @@ This project serves as a demonstration of how Claude code or Gemini CLI works, d
 - Support for multiple LLM providers including OpenAI, Azure, Google Vertex AI, and AWS Bedrock
 - Built-in tool system for file operations, directory management, and shell command execution
 - Available LLM-accessible tools:
-  - File tools: Reading files, writing files, and file globbing
+  - File tools: Reading files, writing files, Editing files and file globbing
   - Directory tools: Listing directory contents 
   - Shell tools: Executing shell commands
 - Event Based Communication Agent and Console ~~and SDK Logger~~
