@@ -5,9 +5,8 @@ import litellm
 from litellm.types.utils import Choices, Message, ModelResponse  # , ModelResponseStream
 
 from src.config import Config
-from src.eventing_system import get_event_manager
-from src.eventing_system.types import StreamEvent, StreamEventType
-from src.tools.tool_manager import ToolCallManager
+from src.event_sys import StreamEvent, StreamEventType, get_event_manager
+from src.tools import ToolCallManager, get_registry
 
 from .client import LlmClient
 
@@ -15,12 +14,12 @@ logger = logging.getLogger(__name__)
 
 
 class ContentGenerator:
-    def __init__(self, config: Config, target_dir: str, tool_call_manager: ToolCallManager):
+    def __init__(self, config: Config, target_dir: str):
         self.config = config
-        self.client = LlmClient(target_dir=self.target_dir, config=self.config)
         self.target_dir = target_dir
-        self.tool_call_manager = tool_call_manager
+        self.client = LlmClient(target_dir=self.target_dir, config=self.config)
         self.event_bus = get_event_manager()
+        self.tool_call_manager = ToolCallManager(self.config, get_registry())
 
     async def generate_content_streaming(
         self,
@@ -32,30 +31,19 @@ class ContentGenerator:
             while True:
                 chunks = []
                 async for chunk in self.client.send_message_stream(messages=messages, tools=tools):
-                    chunks.append(chunk.data)
+                    chunks.append(chunk)
                 response_ = litellm.stream_chunk_builder(chunks)
                 response_choice: Choices = response_.choices[0]
                 response_message = response_choice.message
                 messages = self._update_llm_response(response_message, messages)
-                await self._token_counts(response_)
+
                 if response_message.tool_calls:
-                    await self.event_bus.publish(
-                        StreamEvent(
-                            etype=StreamEventType.TOOL_CALL_START,
-                            tool_result=tool_response,
-                        )
-                    )
                     tool_response = await self.tool_call_manager.schedule(
                         response_message.tool_calls,
                         signal=None,
                     )
-                    await self.event_bus.publish(
-                        StreamEvent(
-                            etype=StreamEventType.TOOL_RESULT,
-                            tool_result=tool_response,
-                        )
-                    )
                     messages = self._update_tool_response(tool_response, messages)
+                await self._token_counts(response_)
                 if response_message.content and response_choice.finish_reason == "stop":
                     final_response = response_message.content
                     break
@@ -108,6 +96,8 @@ class ContentGenerator:
 
     async def _token_counts(self, response: ModelResponse) -> tuple[int, int, int | None]:
         if not response:
+            return 0, 0, None
+        if not hasattr(response, "usage") or response.usage is None:
             return 0, 0, None
         total_tokens = response.usage.total_tokens
         prompt_tokens = response.usage.prompt_tokens

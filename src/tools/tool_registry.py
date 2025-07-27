@@ -1,12 +1,15 @@
 # ruff:  noqa: PLW0603 PLC0415
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from src.config import Config
 
     from .base import Tool
+
+logger = logging.getLogger("tools")
 
 
 class ToolRegistry:
@@ -99,6 +102,7 @@ class ToolRegistry:
 
             if is_enabled:
                 self._register_tool(tool)
+                logger.info(f"Registered tool: {tool_name} ({class_name})")
 
 
 # Global instance of the tool registry

@@ -16,22 +16,22 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument("--debug", action="store_true", help="Enable debug mode")
     parser.add_argument(
         "--model",
-        default="gpt-4o",
+        default="gpt-4o-mini",
         choices=[
             "gpt-4.1",
             "gpt-4o",
             "gemini-1.5",
             "gemini-2.0",
-            "us.deepseek.r1",
+            "deepseek-r1",
             "claude-3-7-sonnet",
         ],
         help="Model to use",
     )
     parser.add_argument(
         "--provider",
-        default="openai",
+        default="openail",
         help="Provider to use (azure, aws, vertex_ai)",
-        choices=["openai","azure", "vertex_ai", "bedrock"],
+        choices=["openai", "azure", "vertex_ai", "bedrock"],
     )
     parser.add_argument("--yolo", action="store_true", help="Execute tools without confirmation")
     args = parser.parse_args()
@@ -50,7 +50,7 @@ async def main() -> None:
     initializes the CLI, and runs in either interactive or non-interactive mode.
     """
     args = _get_args()
-    target_dir = args.target_dir
+    target_dir = "D:/python/doc-inference"
     task = args.task
 
     # Get the appropriate model name using the helper function

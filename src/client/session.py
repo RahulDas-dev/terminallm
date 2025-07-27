@@ -1,10 +1,10 @@
 from string import Template
 from typing import Any
 
-from src.client._prompt import REACT_SYSTEM_PROMPT
-from src.client.content_generator import ContentGenerator
 from src.config import Config
-from src.tools.tool_manager import ToolCallManager
+
+from ._prompt import REACT_SYSTEM_PROMPT
+from .content_generator import ContentGenerator
 
 
 class LLMClientSession:
@@ -12,11 +12,11 @@ class LLMClientSession:
     A session for interacting with a large language model.
     """
 
-    def __init__(self, config: Config, target_dir: str, tool_call_manager: ToolCallManager):
+    def __init__(self, config: Config, target_dir: str):
         self.config = config
         self.target_dir = target_dir
         self.history: list[dict[str, Any]] = []
-        self.content_generator = ContentGenerator(config, target_dir, tool_call_manager)
+        self.content_generator = ContentGenerator(config, target_dir)
 
     def add_user_message(self, message: str) -> None:
         self.history.append({"role": "user", "content": message})

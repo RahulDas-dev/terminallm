@@ -1,11 +1,13 @@
 import json
 import logging
+from time import perf_counter
 from typing import Any
 
 from litellm import ChatCompletionMessageToolCall
 
 from src.config import Config
-from src.event_system import get_event_emitter
+from src.event_sys import get_event_manager
+from src.event_sys.types import StreamEvent, StreamEventType
 
 from .base import Tool
 from .tool_registry import ToolRegistry
@@ -30,8 +32,11 @@ class ToolCallManager:
         self.config = config
         self.tool_registry = tool_registry
         self.tool_calls: list[dict[str, Any]] = []
+        self.event_bus = get_event_manager()
 
-    async def schedule(self, request: list[ChatCompletionMessageToolCall], signal: Any = None) -> list[dict[str, Any]]:
+    async def schedule(
+        self, request: list[ChatCompletionMessageToolCall] | ChatCompletionMessageToolCall, signal: Any = None
+    ) -> list[dict[str, Any]]:
         """
         Schedules a tool call for execution.
 
@@ -46,6 +51,12 @@ class ToolCallManager:
         requests = [request] if not isinstance(request, list) else request
 
         results: list[dict[str, Any]] = []
+        await self.event_bus.publish(
+            StreamEvent(
+                etype=StreamEventType.TOOL_CALL_START,
+                tool_call_data=requests,
+            )
+        )
         for req in requests:
             if not req.function.name:
                 results.append(
@@ -146,12 +157,30 @@ class ToolCallManager:
         Returns:
             The result of the tool call.
         """
-        event_bus = get_event_emitter()
         try:
+            start_time = perf_counter()
             result = await tool.execute(function_args)
-            event_bus.emit("tool:complete", tool.display_name, result["return_display"])
+            await self.event_bus.publish(
+                StreamEvent(
+                    etype=StreamEventType.TOOL_RESULT,
+                    tool_result={
+                        "name": tool.name,
+                        "content": result["return_display"],
+                        "time": (perf_counter() - start_time) * 1000,
+                    },
+                )
+            )
             return result["llm_content"]
         except Exception as e:
             error_msg = str(e)
             logger.exception(f"[TOOL ERROR] {error_msg}")
+            await self.event_bus.publish(
+                StreamEvent(
+                    etype=StreamEventType.TOOL_ERROR,
+                    tool_result={
+                        "name": tool.name,
+                        "content": str(e),
+                    },
+                )
+            )
             return error_msg

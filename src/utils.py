@@ -105,7 +105,7 @@ def setup_logger_for_sdk(name: str) -> logging.Logger:
     return current_logger
 
 
-def get_litellm_model_name(model: str, provider: str) -> str:
+def get_litellm_model_params(model: str, provider: str) -> dict[str, str]:
     """
     Returns the model name formatted for use with the litellm library.
     This function handles special cases for different providers.
@@ -118,22 +118,18 @@ def get_litellm_model_name(model: str, provider: str) -> str:
         The properly formatted model name for litellm
     """
     # Format model name based on provider
-    if provider == "azure" and model == "gpt-4-32k":
-        return "azure/finaclegpt432k"
-    if provider == "azure" and model == "gpt-4o-16k":
-        return "azure/finaclegpt4o16k"
-    if provider == "azure" and model == "gpt-4o":
-        return "azure/finaclegpt4o"
-    if provider == "azure" and model == "gpt-4.1":
-        return "azure/finaclegpt4.1"
+    if provider == "openai":
+        return {"model": model}
     if provider == "vertex_ai" and model == "gemini-1.5":
-        return "vertex_ai/gemini-1.5-pro-002"
+        return {"model": "vertex_ai/gemini-1.5-pro-002"}
     if provider == "vertex_ai" and model == "gemini-2.0":
-        return "vertex_ai/gemini-2.0-flash-001"
+        return {"model": "vertex_ai/gemini-2.0-flash-001"}
     if provider == "bedrock" and model == "claude-3-7-sonnet":
-        return "bedrock/us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+        return {"model": "bedrock/us.anthropic.claude-3-7-sonnet-20250219-v1:0"}
     if provider == "bedrock" and model == "pixtral-large":
-        return "bedrock/us.mistral.pixtral-large-2502-v1:0"
+        return {"model": "bedrock/us.mistral.pixtral-large-2502-v1:0"}
     if provider == "bedrock" and model == "deepseek-r1":
-        return "bedrock/us.deepseek.r1-v1:0"
+        return {"model": "bedrock/us.deepseek.r1-v1:0"}
+    if provider == "ollama" and model == "deepseek-r1":
+        return {"model": "ollama/deepseek-r1", "api_base": os.environ.get("OLLAMA_API_BASE")}
     raise ValueError(f"Unsupported model for provider {provider}: {model}")

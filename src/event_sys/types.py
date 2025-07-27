@@ -1,9 +1,9 @@
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Protocol
 
-from litellm.types.utils import ModelResponseStream
+from litellm.types.utils import ChatCompletionMessageToolCall, ModelResponseStream
 
 
 class StreamEventType(str, Enum):
@@ -19,24 +19,12 @@ class StreamEventType(str, Enum):
     AGENT_THINKING_CHUNK = "agent_thinking_chunk"
     AGENT_THINKING_END = "agent_thinking_end"
     TOOL_CALL_START = "tool_call_start"
+    TOOL_ERROR = "tool_error"
     TOOL_RESULT = "tool_result"
     USER_CANCELLED = "user_cancelled"
     CHAT_COMPRESSED = "chat_compressed"
     PROVIDER_SWITCHED = "provider_switched"
-    TOKEN_COUNT = "token_count"
-
-
-"""
-@dataclass(frozen=True, slots=True)
-class ServerStreamEvent(BaseStreamEvent):
-
-    content: str | None = None
-    chunk: ModelResponseStream | None = None
-    tool_call: ToolCall | None = None
-    tool_result: ToolResult | None = None
-    error: str | None = None
-    thought_subject: str | None = None 
-"""
+    TOKEN_COUNT = "tokens_count"
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,8 +32,10 @@ class StreamEvent:
     etype: StreamEventType
     data: ModelResponseStream | None = None
     error: str | None = None
-    tool_result: list[dict] | None = None
-    token_count: dict[str, Any] | None = None
+    tool_call_data: list[ChatCompletionMessageToolCall] = field(default_factory=list)
+    tool_result: dict = field(default_factory=dict)
+    token_count: dict[str, Any] = field(default_factory=dict)
+    user_input: str | None = field(default=None)
 
 
 class CancellationToken:

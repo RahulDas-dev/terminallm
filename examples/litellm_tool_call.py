@@ -124,7 +124,9 @@ messages: list[dict[str, Any]] = [
 async def tool_calling_loop() -> list[dict[str, Any]]:
     while True:
         response = await litellm.acompletion(
-            model="gpt-4o",  # Replace with your model name
+            model="ollama/qwen3:32b",  # Replace with your model name
+            api_base="http://localhost:11434",
+            # response_format={"type": "json_schema", "json_schema": {"schema": {"type": "object", "properties": {"name": {"type": "string"}}}}},
             messages=messages,
             tools=tools,
             tool_choice="auto",

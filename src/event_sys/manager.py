@@ -10,11 +10,9 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager, suppress
 
-from litellm.types.utils import ModelResponseStream
-
 from .types import CancellationToken, EventHandler, EventHandlerFunc, StreamEvent, StreamEventType
 
-logger = logging.getLogger("event_manager")
+logger = logging.getLogger("event_sys")
 
 
 class EventSubscription:
@@ -143,7 +141,7 @@ class EventManager:
             self._subscriptions[subscription_id] = subscription
             await subscription.start_processing()
 
-            logger.debug(f"Created subscription {subscription_id} for {event_types}")
+            logger.info(f"Created subscription {subscription_id} for {event_types}")
             return subscription_id
 
     async def unsubscribe(self, subscription_id: str) -> None:
@@ -176,10 +174,10 @@ class EventManager:
             List of historical events
         """
         async with self._lock:
-            events_ = self._event_history
+            events = self._event_history
 
             if event_types:
-                events = [e for e in events_ if e.etype in event_types]
+                events = [e for e in events if e.etype in event_types]
 
             if limit:
                 events = events[-limit:]
